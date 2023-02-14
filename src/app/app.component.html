@@ -1,0 +1,4 @@
+<ng-container [ngSwitch]="isModalRoute$ | async">
+  <app-embedded-modal *ngSwitchCase="true"></app-embedded-modal>
+  <app-basic-layout *ngSwitchDefault></app-basic-layout>
+</ng-container>

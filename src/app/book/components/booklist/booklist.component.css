@@ -1,0 +1,11 @@
+.table-row {
+  cursor: pointer;
+}
+
+.table-row:hover {
+  background-color: lightgray;
+}
+
+.selected {
+  background-color: #7ad8ff !important;
+}

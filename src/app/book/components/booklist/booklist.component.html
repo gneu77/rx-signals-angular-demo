@@ -1,0 +1,34 @@
+<div class="container">
+  <h1>Books</h1>
+
+  <div class="flex-container space-between">
+    <div>
+      <label for="search">Search</label>
+      <input #searchInput (input)="onSearch(searchInput.value)" id="search" />
+    </div>
+
+    <div>
+      <div class="flex-container gap">
+        <button [routerLink]="['new']">Add new book</button>
+        <button type="button" (click)="refresh()">Refresh</button>
+      </div>
+    </div>
+  </div>
+
+  <table *ngIf="books$ | async as books" role="grid">
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>Name</th>
+        <th>ISBN</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let book of books" [routerLink]="[book.id]" class="table-row">
+        <td>{{ book.id }}</td>
+        <td>{{ book.name }}</td>
+        <td>{{ book.isbn }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

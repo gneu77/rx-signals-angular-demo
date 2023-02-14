@@ -1,0 +1,44 @@
+<div *ngIf="model$ | async as model" class="container">
+  <h1>{{ model.model?.id ? 'Edit' : 'Add' }} Book</h1>
+
+  <form (submit)="onSubmit($event)">
+    <div>
+      <div class="control">
+        <label for="name">Name</label>
+        <input
+          #nameInput
+          id="name"
+          required
+          type="text"
+          [value]="model.model?.name ?? ''"
+          (input)="update({ name: nameInput.value })"
+          [rxsValidation]="model.validation | pick : 'name'"
+          #nameValidation="rxsValidation"
+        />
+      </div>
+      <ng-container *ngIf="nameValidation.rxsValidationState | async as validation">
+        <div *ngIf="!validation.valid && validation.touched" class="error">
+          {{ validation.validation }}
+        </div>
+      </ng-container>
+    </div>
+
+    <div class="control">
+      <label for="isbn">ISBN</label>
+      <input
+        #isbnInput
+        id="isbn"
+        type="text"
+        [value]="model.model?.isbn ?? ''"
+        (input)="update({ isbn: isbnInput.value })"
+      />
+    </div>
+
+    <div class="flex-container gap">
+      <button [disabled]="model.disabled || !model.changed" type="submit">
+        {{ model.model?.id ? 'Change' : 'Add' }}
+      </button>
+      <button type="button" (click)="navigateBack()">Cancel</button>
+    </div>
+  </form>
+</div>

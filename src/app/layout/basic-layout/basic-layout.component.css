@@ -1,0 +1,10 @@
+.app-nav {
+  align-self: flex-start;
+  padding: 10px;
+}
+
+.app-main {
+  align-self: center;
+  flex: 1;
+  padding: 10px;
+}

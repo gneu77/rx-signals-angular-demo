@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { AsyncPipe, Location, NgIf } from '@angular/common';
 import { EntityEditModel, Store } from '@rx-signals/store';
-import { bookEditInputSignals, bookEditOutputSignals } from '../../signals/booklist-edit.signals';
+import { bookEditInputSignals, bookEditOutputSignals } from '../../signals/book-edit.signals';
 import { Observable } from 'rxjs';
 import { Book } from '../../model/book.model';
 import { PickPipe, RxsValidationDirective } from '@rx-signals/angular-provider';

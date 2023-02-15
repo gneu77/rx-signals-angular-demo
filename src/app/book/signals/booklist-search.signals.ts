@@ -19,6 +19,7 @@ const signals = getModelSignalsFactory<QueryInput>()
     },
     c2: {
       effectDebounceTime: 300,
+      initialResultGetter: () => [],
     },
   });
 

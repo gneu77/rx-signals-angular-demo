@@ -8,7 +8,7 @@ import {
   booklistSearchOutputSignals,
   QueryInput,
 } from '../signals/booklist-search.signals';
-import { bookEditEffectIds, bookEditOutputSignals } from '../signals/booklist-edit.signals';
+import { bookEditEffectIds, bookEditOutputSignals } from '../signals/book-edit.signals';
 import { Location } from '@angular/common';
 import { handleErrors } from '../../utils/error-handler';
 

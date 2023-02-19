@@ -1,5 +1,5 @@
 <div *ngIf="model$ | async as model" class="container">
-  <h1>{{ model.model?.id ? 'Edit' : 'Add' }} Book</h1>
+  <h1>{{ model.entity.id ? 'Edit' : 'Add' }} Book</h1>
 
   <form (submit)="onSubmit($event)">
     <div>
@@ -10,15 +10,15 @@
           id="name"
           required
           type="text"
-          [value]="model.model?.name ?? ''"
+          [value]="model.entity.name"
           (input)="update({ name: nameInput.value })"
-          [rxsValidation]="model.validation | pick : 'name'"
+          [rxsValidation]="model.validation | toGetter | getKey : 'name'"
           #nameValidation="rxsValidation"
         />
       </div>
       <ng-container *ngIf="nameValidation.rxsValidationState | async as validation">
         <div *ngIf="!validation.valid && validation.touched" class="error">
-          {{ validation.validation }}
+          {{ validation.value }}
         </div>
       </ng-container>
     </div>
@@ -29,14 +29,14 @@
         #isbnInput
         id="isbn"
         type="text"
-        [value]="model.model?.isbn ?? ''"
+        [value]="model.entity.isbn ?? ''"
         (input)="update({ isbn: isbnInput.value })"
       />
     </div>
 
     <div class="flex-container gap">
       <button [disabled]="model.disabled || !model.changed" type="submit">
-        {{ model.model?.id ? 'Change' : 'Add' }}
+        {{ model.entity.id ? 'Change' : 'Add' }}
       </button>
       <button type="button" (click)="navigateBack()">Cancel</button>
     </div>

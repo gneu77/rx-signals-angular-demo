@@ -16,7 +16,7 @@ const signals = getEntityEditSignalsFactory<Book>()
   )
   .build({
     defaultEntity: bookDefaultModel,
-    onSaveSuccessEvent: invalidateBooksEvent,
+    onSaveCompletedEvent: invalidateBooksEvent,
   });
 
 export const bookEditInputSignals = signals.input;

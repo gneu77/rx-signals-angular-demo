@@ -4,7 +4,7 @@ import { EntityEditModel, Store } from '@rx-signals/store';
 import { bookEditInputSignals, bookEditOutputSignals } from '../../signals/book-edit.signals';
 import { Observable } from 'rxjs';
 import { Book } from '../../model/book.model';
-import { PickPipe, RxsValidationDirective } from '@rx-signals/angular-provider';
+import { GetKeyPipe, RxsValidationDirective, ToGetterPipe } from '@rx-signals/angular-provider';
 
 @Component({
   selector: 'app-book-edit',
@@ -12,7 +12,7 @@ import { PickPipe, RxsValidationDirective } from '@rx-signals/angular-provider';
   styleUrls: ['./book-edit.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [NgIf, AsyncPipe, RxsValidationDirective, PickPipe],
+  imports: [NgIf, AsyncPipe, RxsValidationDirective, ToGetterPipe, GetKeyPipe],
 })
 export class BookEditComponent {
   protected readonly model$: Observable<EntityEditModel<Book, number, string>> =

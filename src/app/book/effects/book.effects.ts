@@ -53,13 +53,13 @@ export const setupBookEffects = (store: Store) => {
 
   store.addEffect(bookEditEffectIds.validation, getBookValidationEffect());
 
-  store.addEffect(bookEditEffectIds.result, getBookSaveEffect(httpClient));
+  store.addEffect(bookEditEffectIds.save, getBookSaveEffect(httpClient));
   handleErrors(
     store.getEventStream(bookEditOutputSignals.edit.resultErrors),
     () => 'could not save book',
   );
 
-  store.getEventStream(bookEditOutputSignals.edit.resultSuccesses).subscribe(result => {
+  store.getEventStream(bookEditOutputSignals.edit.resultCompletedSuccesses).subscribe(result => {
     if (result.result) {
       location.back();
     }

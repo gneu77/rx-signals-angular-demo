@@ -15,12 +15,10 @@ import { GetKeyPipe, RxsValidationDirective, ToGetterPipe } from '@rx-signals/an
   imports: [NgIf, AsyncPipe, RxsValidationDirective, ToGetterPipe, GetKeyPipe],
 })
 export class BookEditComponent {
-  protected readonly model$: Observable<EntityEditModel<Book, number, string>> =
+  protected readonly model$: Observable<EntityEditModel<Book, { id: number }, number, string>> =
     this.store.getBehavior(bookEditOutputSignals.model);
 
-  constructor(private store: Store, private location: Location) {
-    this.store.dispatch(bookEditInputSignals.reset);
-  }
+  constructor(private store: Store, private location: Location) {}
 
   protected update(event: Partial<Book>) {
     this.store.dispatch(bookEditInputSignals.update, event);

@@ -1,9 +1,14 @@
 <div *ngIf="model$ | async as model" class="container">
   <h1>{{ model.entity.id ? 'Edit' : 'Add' }} Book</h1>
 
+  <ul>
+    <li>The name is mandatory and will be validated for uniqueness.</li>
+    <li>The ISBN is not mandatory, but if specified must conform to ISBN-13 .</li>
+  </ul>
+
   <form (submit)="onSubmit($event)">
-    <div>
-      <div class="control">
+    <div class="control">
+      <div>
         <label for="name">Name</label>
         <input
           #nameInput
@@ -24,14 +29,23 @@
     </div>
 
     <div class="control">
-      <label for="isbn">ISBN</label>
-      <input
-        #isbnInput
-        id="isbn"
-        type="text"
-        [value]="model.entity.isbn ?? ''"
-        (input)="update({ isbn: isbnInput.value })"
-      />
+      <div>
+        <label for="isbn">ISBN</label>
+        <input
+          #isbnInput
+          id="isbn"
+          type="text"
+          [value]="model.entity.isbn ?? ''"
+          (input)="update({ isbn: isbnInput.value })"
+          [rxsValidation]="model.validation | toGetter | getKey : 'isbn'"
+          #isbnValidation="rxsValidation"
+        />
+      </div>
+      <ng-container *ngIf="isbnValidation.rxsValidationState | async as validation">
+        <div *ngIf="!validation.valid && validation.touched" class="error">
+          {{ validation.value }}
+        </div>
+      </ng-container>
     </div>
 
     <div class="flex-container gap">

@@ -1,8 +1,14 @@
-import { Effect, ModelValidationResult, Store } from '@rx-signals/store';
+import {
+  Effect,
+  ModelValidationResult,
+  ModelWithDefault,
+  Store,
+  toGetter,
+} from '@rx-signals/store';
 import { inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Book, bookDefaultModel, PersistedBook } from '../model/book.model';
-import { map, of } from 'rxjs';
+import { Book, bookDefaultModel, PersistedBook, validateBook } from '../model/book.model';
+import { delay, filter, map, Observable, of, startWith, switchMap } from 'rxjs';
 import {
   booklistSearchEffectId,
   booklistSearchOutputSignals,
@@ -19,10 +25,10 @@ const getBooklistSearchEffect =
   query =>
     httpClient.get<PersistedBook[]>(baseUrl, query ? { params: { q: query } } : undefined);
 
-const getEditBookEffect =
-  (httpClient: HttpClient): Effect<number | null, Book> =>
-  id =>
-    id ? httpClient.get<PersistedBook>(`${baseUrl}/${id}`) : of(bookDefaultModel);
+const getLoadBookEffect =
+  (httpClient: HttpClient): Effect<{ id: number } | null, Book> =>
+  input =>
+    input?.id ? httpClient.get<PersistedBook>(`${baseUrl}/${input.id}`) : of(bookDefaultModel);
 
 const getBookSaveEffect =
   (httpClient: HttpClient): Effect<Book, number> =>
@@ -32,8 +38,32 @@ const getBookSaveEffect =
       : httpClient.post<PersistedBook>(baseUrl, book)
     ).pipe(map(book => book.id));
 
-const getBookValidationEffect = (): Effect<Book, ModelValidationResult<Book>> => book =>
-  book.name.trim() ? of(null) : of({ name: 'Name is mandatory' });
+const getBookIdByName = (httpClient: HttpClient, name: string): Observable<number | undefined> =>
+  httpClient.get<PersistedBook[]>(baseUrl, { params: { name } }).pipe(map(books => books?.[0]?.id));
+
+// We apply two-phase validation:
+//   1.) initial validation result without delay, but also without uniqueness-check
+//   2.) if necessary (name changed and name not empty), we apply a debounced uniqueness-check against the backend
+const getBookValidationEffect =
+  (httpClient: HttpClient): Effect<ModelWithDefault<Book>, ModelValidationResult<Book>> =>
+  (bookWithDefault, _, prevInput, prevResult) =>
+    of(null).pipe(
+      delay(500), // debouncing the backend validation
+      filter(() => bookWithDefault.model.name.trim() !== ''),
+      filter(
+        // no need to check uniqueness, if name matches name of loaded model
+        () =>
+          bookWithDefault.model.id === undefined ||
+          bookWithDefault.model.name !== bookWithDefault.default.name,
+      ),
+      filter(() => toGetter(prevInput)('model')('name').get() !== bookWithDefault.model.name), // no need to check uniqueness, if name has not changed
+      switchMap(() =>
+        getBookIdByName(httpClient, bookWithDefault.model.name).pipe(
+          map(id => validateBook(bookWithDefault, prevInput, prevResult, id)), // validate with uniqueness-check
+        ),
+      ),
+      startWith(validateBook(bookWithDefault, prevInput, prevResult)), // initial validation without waiting for backend
+    );
 
 export const setupBookEffects = (store: Store) => {
   const httpClient = inject(HttpClient);
@@ -45,13 +75,13 @@ export const setupBookEffects = (store: Store) => {
     () => 'could not load books',
   );
 
-  store.addEffect(bookEditEffectIds.load, getEditBookEffect(httpClient));
+  store.addEffect(bookEditEffectIds.load, getLoadBookEffect(httpClient));
   handleErrors(
     store.getEventStream(bookEditOutputSignals.load.errors),
     id => `could not load book with id ${id}`,
   );
 
-  store.addEffect(bookEditEffectIds.validation, getBookValidationEffect());
+  store.addEffect(bookEditEffectIds.validation, getBookValidationEffect(httpClient));
 
   store.addEffect(bookEditEffectIds.save, getBookSaveEffect(httpClient));
   handleErrors(
@@ -59,9 +89,8 @@ export const setupBookEffects = (store: Store) => {
     () => 'could not save book',
   );
 
-  store.getEventStream(bookEditOutputSignals.edit.resultCompletedSuccesses).subscribe(result => {
-    if (result.result) {
-      location.back();
-    }
+  store.addEffect(bookEditEffectIds.afterSaveSuccess, () => {
+    location.back();
+    return of(undefined);
   });
 };

@@ -1,13 +1,13 @@
-import {
-  Effect,
-  ModelValidationResult,
-  ModelWithDefault,
-  Store,
-  toGetter,
-} from '@rx-signals/store';
+import { Effect, ModelValidationResult, ModelWithDefault, Store } from '@rx-signals/store';
 import { inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Book, bookDefaultModel, PersistedBook, validateBook } from '../model/book.model';
+import {
+  Book,
+  bookDefaultModel,
+  bookWithDefaultNameLens,
+  PersistedBook,
+  validateBook,
+} from '../model/book.model';
 import { delay, filter, map, Observable, of, startWith, switchMap } from 'rxjs';
 import {
   booklistSearchEffectId,
@@ -56,7 +56,7 @@ const getBookValidationEffect =
           bookWithDefault.model.id === undefined ||
           bookWithDefault.model.name !== bookWithDefault.default.name,
       ),
-      filter(() => toGetter(prevInput)('model')('name').get() !== bookWithDefault.model.name), // no need to check uniqueness, if name has not changed
+      filter(() => bookWithDefaultNameLens.get(prevInput) !== bookWithDefault.model.name), // no need to check uniqueness, if name has not changed
       switchMap(() =>
         getBookIdByName(httpClient, bookWithDefault.model.name).pipe(
           map(id => validateBook(bookWithDefault, prevInput, prevResult, id)), // validate with uniqueness-check

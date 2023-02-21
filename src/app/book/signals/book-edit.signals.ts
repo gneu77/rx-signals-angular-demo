@@ -1,15 +1,13 @@
 import {
   EffectCompletedSuccess,
-  getEffectId,
   getEntityEditSignalsFactory,
-  getStateId,
+  getVoidEffectSignalsFactory,
   ModelWithDefault,
-  NO_VALUE,
   Store,
 } from '@rx-signals/store';
 import { Book, bookDefaultModel } from '../model/book.model';
 import { currentRouteState } from '../../navigation/signals/navigation.signals';
-import { filter, map, switchMap, take } from 'rxjs';
+import { filter, map } from 'rxjs';
 import { invalidateBooksEvent } from './invalidate-books.event';
 
 const signals = getEntityEditSignalsFactory<Book, { id: number }, number>()
@@ -23,27 +21,19 @@ const signals = getEntityEditSignalsFactory<Book, { id: number }, number>()
     'load',
     false,
   ) // retrieving the ID param from editBook route and connecting it to the load-effect input
-  .addEffectId('afterSaveSuccess', () =>
-    getEffectId<EffectCompletedSuccess<ModelWithDefault<Book>, number>, void>(),
-  ) // adding id for an after-save-success effect
-  .extendSetup((store, _, output, _2, effects) => {
-    // connecting the result-completed-success event with the after-save-success effect:
-    const internalStateId = getStateId<void>();
-    store.connectObservable(
-      store.getEffect(effects.afterSaveSuccess).pipe(
-        take(1),
-        switchMap(eff =>
-          store
-            .getEventStream(output.edit.resultCompletedSuccesses)
-            .pipe(switchMap(successEvent => eff(successEvent, store, NO_VALUE, NO_VALUE))),
-        ),
-      ),
-      internalStateId,
-    );
-  })
+  .compose(getVoidEffectSignalsFactory<EffectCompletedSuccess<ModelWithDefault<Book>, number>>()) // for an effect we want to execute after successful save
+  .renameEffectId('voidEffect', 'afterSaveSuccess')
+  .connectObservable(
+    (store, output) => store.getEventStream(output.edit.resultCompletedSuccesses),
+    'inputEvent',
+    false,
+  ) // connecting the resultCompletedSuccess event with the input for our afterSaveSuccess effect
   .build({
-    defaultEntity: bookDefaultModel,
-    onSaveCompletedEvent: invalidateBooksEvent,
+    c1: {
+      defaultEntity: bookDefaultModel,
+      onSaveCompletedEvent: invalidateBooksEvent,
+    },
+    c2: {},
   });
 
 export const bookEditInputSignals = signals.input;

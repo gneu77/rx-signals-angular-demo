@@ -14,9 +14,8 @@ export const bookDefaultModel: Book = {
   name: '',
 };
 
-export const bookValidationNameLens = getLens<ModelValidationResult<Book> | NoValueType>().k(
-  'name',
-);
+export const bookValidationLens = getLens<ModelValidationResult<Book> | NoValueType>();
+export const bookValidationNameLens = bookValidationLens.k('name');
 export const bookWithDefaultNameLens = getLens<ModelWithDefault<Book> | NoValueType>()
   .k('model')
   .k('name');

@@ -17,7 +17,7 @@
           type="text"
           [value]="model.entity.name"
           (input)="update({ name: nameInput.value })"
-          [rxsValidation]="nameLens | lensGet : model.validation"
+          [rxsValidation]="nameLens | lens : model.validation"
           #nameValidation="rxsValidation"
         />
       </div>
@@ -37,7 +37,7 @@
           type="text"
           [value]="model.entity.isbn ?? ''"
           (input)="update({ isbn: isbnInput.value })"
-          [rxsValidation]="lens | anyLensKey : 'isbn' | lensGet : model.validation"
+          [rxsValidation]="validationLens | anyLensKey : 'isbn' | lens : model.validation"
           #isbnValidation="rxsValidation"
         />
       </div>

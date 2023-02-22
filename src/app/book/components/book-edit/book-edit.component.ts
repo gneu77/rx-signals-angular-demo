@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { AsyncPipe, Location, NgIf } from '@angular/common';
-import { EntityEditModel, getLens, ModelValidationResult, Store } from '@rx-signals/store';
+import { EntityEditModel, Store } from '@rx-signals/store';
 import { bookEditInputSignals, bookEditOutputSignals } from '../../signals/book-edit.signals';
 import { Observable } from 'rxjs';
-import { Book } from '../../model/book.model';
-import { AnyLensKeyPipe, LensGetPipe, RxsValidationDirective } from '@rx-signals/angular-provider';
+import { Book, bookValidationLens } from '../../model/book.model';
+import { AnyLensKeyPipe, LensPipe, RxsValidationDirective } from '@rx-signals/angular-provider';
 
 @Component({
   selector: 'app-book-edit',
@@ -12,11 +12,11 @@ import { AnyLensKeyPipe, LensGetPipe, RxsValidationDirective } from '@rx-signals
   styleUrls: ['./book-edit.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [NgIf, AsyncPipe, RxsValidationDirective, LensGetPipe, AnyLensKeyPipe],
+  imports: [NgIf, AsyncPipe, RxsValidationDirective, AnyLensKeyPipe, LensPipe],
 })
 export class BookEditComponent {
-  protected readonly lens = getLens<ModelValidationResult<Book>>();
-  protected readonly nameLens = this.lens.k('name');
+  protected readonly validationLens = bookValidationLens;
+  protected readonly nameLens = this.validationLens.k('name');
 
   protected readonly model$: Observable<EntityEditModel<Book, { id: number }, number, string>> =
     this.store.getBehavior(bookEditOutputSignals.model);

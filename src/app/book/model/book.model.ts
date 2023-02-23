@@ -1,4 +1,10 @@
-import { getLens, ModelValidationResult, ModelWithDefault, NoValueType } from '@rx-signals/store';
+import {
+  getLens,
+  ModelValidationResult,
+  ModelWithDefault,
+  NoValueType,
+  SafeEffectResult,
+} from '@rx-signals/store';
 
 export type Book = {
   id?: number;
@@ -14,7 +20,9 @@ export const bookDefaultModel: Book = {
   name: '',
 };
 
-export const bookValidationLens = getLens<ModelValidationResult<Book> | NoValueType>();
+export const bookValidationLens = getLens<
+  ModelValidationResult<Book> | NoValueType | SafeEffectResult<ModelValidationResult<Book>, string>
+>();
 export const bookValidationNameLens = bookValidationLens.k('name');
 export const bookWithDefaultNameLens = getLens<ModelWithDefault<Book> | NoValueType>()
   .k('model')
@@ -27,7 +35,7 @@ const isbnRegex =
 export const validateBook = (
   m: ModelWithDefault<Book>,
   prevInput: NoValueType | ModelWithDefault<Book>,
-  prevResult: NoValueType | ModelValidationResult<Book>,
+  prevResult: NoValueType | SafeEffectResult<ModelValidationResult<Book>, string>,
   idOfBookWithSameName?: number,
 ): ModelValidationResult<Book> => ({
   name:

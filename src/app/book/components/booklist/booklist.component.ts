@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { PersistedBook } from '../../model/book.model';
-import { map, Observable } from 'rxjs';
+import { filter, map, Observable } from 'rxjs';
 import { RouterLink } from '@angular/router';
-import { Store } from '@rx-signals/store';
+import { isCombinedEffectResultInCompletedSuccessState, Store } from '@rx-signals/store';
 import {
   booklistSearchInputSignals,
   booklistSearchOutputSignals,
@@ -19,8 +19,11 @@ import { AsyncPipe, NgForOf, NgIf } from '@angular/common';
 })
 export class BooklistComponent {
   protected readonly books$: Observable<PersistedBook[]> = this.store
-    .getBehavior(booklistSearchOutputSignals.result)
-    .pipe(map(result => result.result));
+    .getBehavior(booklistSearchOutputSignals.combined)
+    .pipe(
+      filter(isCombinedEffectResultInCompletedSuccessState),
+      map(result => result.result),
+    );
 
   constructor(private store: Store) {}
 
